@@ -1,6 +1,9 @@
+from flask import Flask, jsonify, request
 from playwright.async_api import async_playwright
 from urllib.parse import urljoin
 import asyncio
+
+app = Flask(__name__)
 
 # Fonction Playwright pour récupérer les articles dynamiquement
 def filter_articles(articles, keywords, url):
@@ -48,16 +51,17 @@ async def scrape_with_playwright(url, keywords):
         await browser.close()
         return filter_articles(articles, keywords, url)
 
-# Fonction principale qui exécute le scraping
-def main():
-    url = input("Entrez l'URL à scraper: ")  # Demande à l'utilisateur l'URL à scraper
-    keywords_input = input("Entrez les mots-clés, séparés par des virgules: ").lower()
-    keywords = keywords_input.split(',')
-
-    # Exécute la fonction de scraping et affiche les résultats
+# Endpoint de l'API pour effectuer le scraping
+@app.route('/scrape', methods=['GET'])
+def scrape():
+    url = request.args.get('url')  # URL passée en paramètre
+    keywords = request.args.get('type', '').lower().split(',')  # Mots-clés passés en paramètre
+    if not url:
+        return jsonify({"error": "L'URL est requise"}), 400  # Si l'URL est manquante, retourner une erreur
+    
+    # Exécuter le scraping et retourner les résultats sous forme de JSON
     articles = asyncio.run(scrape_with_playwright(url, keywords))
-    for article in articles:
-        print(f"Title: {article['title']}\nLink: {article['link']}\nImage: {article['image']}\n")
+    return jsonify(articles)
 
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
