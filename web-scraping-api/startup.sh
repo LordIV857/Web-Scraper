@@ -1,7 +1,9 @@
 #!/bin/bash
 
-# Installe les bibliothèques manquantes requises pour Playwright
+# Mise à jour des dépôts
 apt-get update
+
+# Installation des bibliothèques manquantes
 apt-get install -y \
   libgtk-4.0-0 \
   libgraphene-1.0-0 \
@@ -12,6 +14,9 @@ apt-get install -y \
   libsecret-1-0 \
   libmanette-0.2-0 \
   libgles2-mesa
+
+# Vérification de l'installation
+dpkg -l | grep 'libgtk\|libgraphene\|libgstgl\|libavif\|libsecret\|libgles2'
 
 # Installer les dépendances Python
 pip install -r requirements.txt
